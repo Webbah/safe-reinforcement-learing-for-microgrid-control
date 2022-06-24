@@ -2,6 +2,14 @@ import itertools
 import json
 import os
 import platform
+import sys
+import os
+
+module_path = os.path.abspath(os.getcwd())
+
+if module_path not in sys.path:
+
+    sys.path.append(module_path)
 
 import numpy as np
 import optuna

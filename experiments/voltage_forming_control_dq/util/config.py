@@ -1,8 +1,9 @@
 cfg = dict(lea_vpn_nodes=['lea-skynet', 'lea-picard', 'lea-barclay',
                           'lea-cyberdyne', 'webbah-ThinkPad-L380', 'LEA_WORK35', 'webbah-ThinkPad-T14-Gen-2a'],
-           #STUDY_NAME='P10_Safe_DDPG_R_load_delay',
-           STUDY_NAME='Debug',
-           meas_data_folder='experiment_data/',
+           STUDY_NAME='P10_Safe_DDPG_R_load_delay',
+           #STUDY_NAME='Debug',
+           #meas_data_folder='experiment_data/',
+           meas_data_folder='/mnt/hdd1/experimental_results/webbah/experiment_data/',
            MONGODB_PORT=12001,
            loglevel='train',  # setting ~ config + return/learning curve (most is stored anyway, only effects in
            #           test saving stuff

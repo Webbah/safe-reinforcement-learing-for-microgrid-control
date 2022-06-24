@@ -194,11 +194,12 @@ def train_ddpg(HPO, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_s
                                           training_episode_length=training_episode_length, config=cfg, safe=safe_layer)
 
         elif cfg['env_wrapper'] == 'no-I-term':
-            env_test = BaseWrapper(env_test, number_of_features=6 + number_past_vals * 3,
-                                   training_episode_length=training_episode_length,
-                                   # recorder=mongo_recorder,
-                                   n_trail=n_trial, gamma=gamma,
-                                   number_learing_steps=number_learning_steps, number_past_vals=number_past_vals)
+            env_test = BaseWrapper(env, number_of_features=6 + number_past_vals * 3,
+                          training_episode_length=training_episode_length,
+                          # recorder=mongo_recorder,
+                          n_trail=n_trial, gamma=gamma,
+                          number_learing_steps=number_learning_steps, number_past_vals=number_past_vals, config=cfg,
+                          safe=safe_layer)
 
         else:
             env_test = SecWrapper(env_test, number_of_features=11, integrator_weight=integrator_weight,

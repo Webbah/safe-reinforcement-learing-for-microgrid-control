@@ -10,7 +10,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.type_aliases import GymStepReturn
 
 from experiments.voltage_forming_control_dq.util.config import cfg
-from feasible_set_test import feasible_set
+from feasible_set_test import feasible_set, A_d, B_d
 from util.safeguard import Safeguard
 
 
@@ -78,10 +78,11 @@ class BaseWrapper(Monitor):
             self.u_c_safe = []
             self.safe_guard_failed = []
             self.safe_guard_rand_failed = []
+            self.action_prev = np.zeros(self.action_space.shape)
 
         if safe:
             self.safe_guard = Safeguard(feasible_set, set_scaler=0, state_limits=np.array([300, 325*1.2]),
-                                        action_limits=np.array([400]))
+                                        action_limits=np.array([400]), A_d=A_d, B_d=B_d, ts=self.env.env.time_step_size)
 
         else:
             self.safe_guard = None
@@ -127,11 +128,23 @@ class BaseWrapper(Monitor):
 
                 obs_i = self.env.history.df.values[-1, self.env.env._out_obs_tmpl._data[0][a]]
                 obs_v = self.env.history.df.values[-1, self.env.env._out_obs_tmpl._data[0][a + 3]]
+
+                if self.env.env.action_time_delay == 1:
+                    # use action of one step before to see how state will develop
+                    # action_prev will be applied now
+                    obs_i, obs_v = self.safe_guard.predict(np.array([obs_i, obs_v]), self.action_prev[a]*
+                                                           (self.env.env.net.components[0].v_DC/2))
+
                 action_safe, sg_active = self.safe_guard.guide(action_abc[a] * (self.env.env.net.components[0].v_DC/2),
                                                                (obs_i, obs_v))
                 # a_list.append(action_safe)
                 a_safe[a] = action_safe / (self.env.env.net.components[0].v_DC / 2)
                 sg_list.append(sg_active)
+
+            if self.env.env.action_time_delay == 1:
+                self.action_prev = a_safe
+                a_safe_dq0 = abc_to_dq0(a_safe, self.env.net.components[0].phase)
+
             self.u_safe.append(a_safe.tolist())
             self.u_RL.append(action_abc.tolist())
 
@@ -258,11 +271,17 @@ class BaseWrapper(Monitor):
         Add used action to the NN input to learn delay
         """
         obs = np.append(obs, self.used_P)
+        #obs = np.append(obs, self.used_P2)
         obs_delay_array = self.shift_and_append(obs[3:6])
         obs = np.append(obs, obs_delay_array)
 
         # todo efficiency?
-        self.used_P = np.copy(action)
+        if self.safe_guard is not None:
+            # store the action which is given to env for next feature (delay of 1 only!)
+            self.used_P2 = np.copy(self.used_P)
+            self.used_P = np.copy(a_safe_dq0)
+        else:
+            self.used_P = np.copy(action)
 
         return obs, reward, done, info
 
@@ -298,6 +317,7 @@ class BaseWrapper(Monitor):
 
         self._n_training_steps = 0
         self.used_P = np.zeros(self.action_space.shape)
+        self.used_P2 = np.zeros(self.action_space.shape)
 
         """
         Features
@@ -309,6 +329,7 @@ class BaseWrapper(Monitor):
         Add used action to the NN input to learn delay
         """
         obs = np.append(obs, self.used_P)
+        #obs = np.append(obs, self.used_P2)
 
         obs_delay_array = self.shift_and_append(obs[3:6])
         obs = np.append(obs, obs_delay_array)

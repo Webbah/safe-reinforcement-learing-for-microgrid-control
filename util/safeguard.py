@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 from scipy.optimize import minimize, LinearConstraint
 import polytope
+import control
 import pypoman
 
 # from https://github.com/GitPascalP/masc/blob/main/masc/mpc/controller.py
@@ -21,7 +22,8 @@ def safe_costs_derivative(u, u_rl):
 class Safeguard:
     """ safeguard to ensure that the RL-Agent takes only safe actions """
 
-    def __init__(self, constraints, set_scaler=None, savepath=None, state_limits = None, action_limits = None):
+    def __init__(self, constraints, set_scaler=None, savepath=None, state_limits=None, action_limits=None,
+                 A_d=None, B_d=None, ts=None):
         """
         args:
             constraints (polytope): polytope describing the feasible set
@@ -39,6 +41,10 @@ class Safeguard:
         self.action_lim = action_limits
         self.sol_not_found = 0
         self.rand_sol_not_found = 0
+        self.A_d = A_d
+        self.B_d = B_d
+        self.sys = control.ss(A_d, B_d, np.eye(len(A_d)), 0, dt=True)
+        self.ts = ts
 
         if self.constraints_F0 is not None:
             self.update(
@@ -185,3 +191,9 @@ class Safeguard:
     def check_constraints(self, state_action):
         """ check if state-action vector lies within feasible set """
         return state_action in self.guard_constraints
+
+    def predict(self, x0, u):
+        T, yout_d, xout_d = control.forced_response(self.sys, T=np.array([0, 0 + self.ts]), U=np.array([u, u]).T,
+                                                    X0=x0, return_x=True, squeeze=True)
+
+        return xout_d [:, -1]

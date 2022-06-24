@@ -191,7 +191,7 @@ register(id='vctrl_single_inv_train-v0',
              # model_path='experiments/voltage_forming_control_dq/grids/grid.paper_loadstep.fmu',
              on_episode_reset_callback=cb.fire,
              is_normalized=True,
-             action_time_delay=0
+             action_time_delay=1
          )
          )
 

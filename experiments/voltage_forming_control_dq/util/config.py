@@ -1,6 +1,6 @@
 cfg = dict(lea_vpn_nodes=['lea-skynet', 'lea-picard', 'lea-barclay',
                           'lea-cyberdyne', 'webbah-ThinkPad-L380', 'LEA_WORK35', 'webbah-ThinkPad-T14-Gen-2a'],
-           STUDY_NAME='P10_Safe_DDPG_R_load_clip_state_clip_action',
+           STUDY_NAME='P10_Safe_DDPG_R_load_delay',
            #STUDY_NAME='Debug',
            meas_data_folder='experiment_data/',
            MONGODB_PORT=12001,

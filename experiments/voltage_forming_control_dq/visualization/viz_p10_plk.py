@@ -25,7 +25,7 @@ episode_list = ['0', '375']
 terminated_list = ['1', '1']
 
 """
-trial = ['8']
+trial = ['9']
 episode_list = ['0', '40', '160']
 terminated_list = ['0', '0', '0']
 study_name = 'P10_Safe_DDPG_R_load_delay' #cfg['STUDY_NAME']

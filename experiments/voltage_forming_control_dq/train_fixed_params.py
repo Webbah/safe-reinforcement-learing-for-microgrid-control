@@ -21,7 +21,7 @@ def ddpg_objective_fix_params_optuna(trial):
     file_congfig = open('experiments/voltage_forming_control_dq/PC2_DDPG_Vctrl_single_inv_22_newTestcase_Trial_number_11534_0.json', )
     trial_config = json.load(file_congfig)
 
-    number_learning_steps = 150000  # trial.suggest_int("number_learning_steps", 100000, 1000000)
+    number_learning_steps = 5000  # trial.suggest_int("number_learning_steps", 100000, 1000000)
     # rew_weigth = trial.suggest_float("rew_weigth", 0.1, 5)
     # rew_penalty_distribution = trial.suggest_float("antiwindup_weight", 0.1, 5)
     penalty_I_weight = trial_config["penalty_I_weight"]  # trial.suggest_float("penalty_I_weight", 100e-6, 2)
@@ -94,6 +94,7 @@ def ddpg_objective_fix_params_optuna(trial):
         "optimizer"]  # trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"])  # , "LBFGS"])
 
     number_past_vals = 5#trial_config["number_past_vals"]  # trial.suggest_int("number_past_vals", 0, 15)
+    number_past_vals = trial.suggest_int("number_past_vals", 0, 7)
 
     number_learning_steps = trial.suggest_int("number_learning_steps", number_learning_steps, number_learning_steps)
     seed = trial.suggest_int("seed", 0, 10)
@@ -121,6 +122,7 @@ def ddpg_objective_fix_params_optuna(trial):
     noise_var = trial.suggest_loguniform("noise_var", noise_var, noise_var)  # 2
     noise_var_min = 0.0013  # trial.suggest_loguniform("noise_var_min", 0.0000001, 2)
     number_past_vals = trial.suggest_int("number_past_vals", number_past_vals, number_past_vals)
+    #optimizer = trial.suggest_categorical("optimizer", [optimizer])  # , "LBFGS"])
     optimizer = trial.suggest_categorical("optimizer", [optimizer])  # , "LBFGS"])
     penalty_I_weight = trial.suggest_float("penalty_I_weight", penalty_I_weight, penalty_I_weight)
     penalty_P_weight = trial.suggest_float("penalty_P_weight", penalty_P_weight, penalty_P_weight)
@@ -201,7 +203,8 @@ def optuna_optimize_sqlite(objective, sampler=None, study_name='dummy'):
 if __name__ == '__main__':
     #learning_rate = list(itertools.chain(*[[1e-9] * 1]))
     seed = [0, 1, 2]
-    search_space = {'seed': seed}  # , 'number_learning_steps': number_learning_steps}
+    number_past_vals = [0, 1, 2, 3, 4, 5, 6, 7]
+    search_space = {'seed': seed, 'number_past_vals': number_past_vals}  # , 'number_learning_steps': number_learning_steps}
 
 
     #loss = ddpg_objective_fix_params()

@@ -36,6 +36,8 @@ def train_ddpg(HPO, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_s
     np.random.seed(seed)
     if node in cfg['lea_vpn_nodes']:
         save_folder = 'data/' + cfg['meas_data_folder']
+        if node in ['lea-cyberdyne']:
+            save_folder = cfg['meas_data_folder']
         log_path = f'{folder_name}/{n_trial}/'
     else:
         # assume we are on a node of pc2 -

@@ -206,12 +206,15 @@ def optuna_optimize_sqlite(objective, sampler=None, study_name='dummy'):
                                 load_if_exists=True,
                                 sampler=sampler
                                 )
-    study.optimize(objective, n_trials=n_trials)
+    #study.optimize(objective, n_trials=n_trials)
+    study.optimize(objective)
 
 if __name__ == '__main__':
     #learning_rate = list(itertools.chain(*[[1e-9] * 1]))
-    seed = [0, 1, 2]
-    number_past_vals = [0, 1, 2, 3, 4, 5, 6, 7]
+    #seed = [0, 1, 2]
+    #number_past_vals = [0, 1, 2, 3, 4, 5, 6, 7]
+    seed = [0]
+    number_past_vals = [2, 5]
     search_space = {'seed': seed, 'number_past_vals': number_past_vals}  # , 'number_learning_steps': number_learning_steps}
 
 

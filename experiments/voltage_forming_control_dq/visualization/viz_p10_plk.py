@@ -24,10 +24,18 @@ trial = ['20']
 episode_list = ['0', '375']
 terminated_list = ['1', '1']
 
-"""
-trial = ['9']
+# pVals = 10, 5kSteps
+trial = ['8']
 episode_list = ['0', '40', '160']
 terminated_list = ['0', '0', '0']
+study_name = 'P10_Safe_DDPG_R_load_delay' #cfg['STUDY_NAME']
+
+
+"""
+# pVals = 2, 1.5kSteps
+trial = ['9']
+episode_list = ['0', '40']
+terminated_list = ['0', '0']
 study_name = 'P10_Safe_DDPG_R_load_delay' #cfg['STUDY_NAME']
 
 interval_list_x = [0, 1]

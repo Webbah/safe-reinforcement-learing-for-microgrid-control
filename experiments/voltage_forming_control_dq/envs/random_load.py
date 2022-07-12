@@ -40,9 +40,26 @@ class RandomLoad:
 
     def reset(self, loadstep_time=None):
         if loadstep_time is None:
+            # todo: generalize
             self.loadstep_time = np.random.randint(0, self.train_episode_length)
         else:
             self.loadstep_time = loadstep_time
+        self.constant_load = np.random.randint(10, 300)
+        self.load_change = np.random.uniform(0.01, 10)
+
+    def load_step(self, t):
+        if np.random.randint(0, 501) < 1:
+            self.constant_load = np.random.randint(10, 300)
+        return self.constant_load
+
+        #if t < self.loadstep_time * self.ts:
+        #    return self.constant_load
+        #else:
+        #    return self.constant_load *self.load_change
+
+    def return_const_load(self, t):
+        return self.constant_load
+
 
     def clipped_step(self, t):
         return np.clip(self.rand_process.sample(t),
@@ -74,7 +91,7 @@ class RandomLoad:
         :return: Sample from SP
         """
         # Changes rand process data with probability of 5% and sets new value randomly
-        if np.random.randint(0, 1001) < 2:
+        if np.random.randint(0, 1001) < .2:
 
             gain = np.random.randint(self.rand_process.bounds[0], self.rand_process.bounds[1])
 

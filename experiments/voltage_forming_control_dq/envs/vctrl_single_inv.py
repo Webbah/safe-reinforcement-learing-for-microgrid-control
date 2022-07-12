@@ -123,7 +123,7 @@ def xylables_R(fig):
 
 
 # toDo: train_episode_length not needed in used methods, reset not as well?
-rand_load_train = RandomLoad(5000, net.ts, gen,
+rand_load_train = RandomLoad(2811, net.ts, gen, loadstep_time=None,
                              bounds=(lower_bound_load_clip, upper_bound_load_clip),
                              bounds_std=(lower_bound_load_clip_std, upper_bound_load_clip_std))
 
@@ -166,12 +166,15 @@ register(id='vctrl_single_inv_train-v0',
                            'lc.capacitor1.C': C_filter,
                            'lc.capacitor2.C': C_filter,
                            'lc.capacitor3.C': C_filter,
-                           # 'r_load.resistor1.R': partial(rand_load_train.load_step, gain=R),
-                           # 'r_load.resistor2.R': partial(rand_load_train.load_step, gain=R),
-                           # 'r_load.resistor3.R': partial(rand_load_train.load_step, gain=R),
-                           'r_load.resistor1.R': 100, #rand_load_train.random_load_step,
-                           'r_load.resistor2.R': 100, #rand_load_train.clipped_step,
-                           'r_load.resistor3.R': 100, #rand_load_train.clipped_step,
+                           'r_load.resistor1.R': 100,
+                           'r_load.resistor2.R': 100,
+                           'r_load.resistor3.R': 100,
+                           #'r_load.resistor1.R': partial(rand_load_train.load_step),
+                           #'r_load.resistor2.R': partial(rand_load_train.return_const_load),
+                           #'r_load.resistor3.R': partial(rand_load_train.return_const_load),
+                           #'r_load.resistor1.R': rand_load_train.random_load_step,
+                           #'r_load.resistor2.R': rand_load_train.clipped_step,
+                           #'r_load.resistor3.R': rand_load_train.clipped_step,
                            'lc.capacitor1.v': lambda t: 0 if t == -1 else None,
                            'lc.capacitor2.v': lambda t: 0 if t == -1 else None,
                            'lc.capacitor3.v': lambda t: 0 if t == -1 else None,

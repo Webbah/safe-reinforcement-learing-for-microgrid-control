@@ -10,8 +10,9 @@ from stable_baselines3.common.noise import OrnsteinUhlenbeckActionNoise
 
 # np.random.seed(0)
 
-from experiments.voltage_forming_control_dq.envs.env_wrapper import SecWrapperPastVals, BaseWrapper, SecWrapper
+from experiments.voltage_forming_control_dq.envs.env_wrapper import BaseWrapper
 from experiments.voltage_forming_control_dq.envs.rewards import Reward
+from experiments.voltage_forming_control_dq.envs.sec_wrapper import SecWrapperPastVals, SecWrapper
 from experiments.voltage_forming_control_dq.envs.vctrl_single_inv import net
 from experiments.voltage_forming_control_dq.util.config import cfg
 from experiments.voltage_forming_control_dq.util.custom_network import custom_network
@@ -31,7 +32,7 @@ def train_ddpg(HPO, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_s
                tau, number_learning_steps, integrator_weight, antiwindup_weight,
                penalty_I_weight, penalty_P_weight,
                train_freq_type, train_freq, t_start_penalty_I, t_start_penalty_P, optimizer,
-               number_past_vals, seed, n_trial, safe_layer):
+               number_past_vals, seed, n_trial, safe_layer, learn_model):
 
     np.random.seed(seed)
     if node in cfg['lea_vpn_nodes']:
@@ -77,7 +78,7 @@ def train_ddpg(HPO, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_s
                           # recorder=mongo_recorder,
                           n_trail=n_trial, gamma=gamma,
                           number_learing_steps=number_learning_steps, number_past_vals=number_past_vals, config=cfg,
-                          safe=safe_layer)
+                          safe=safe_layer, learn_model=learn_model)
 
     else:
         env = SecWrapper(env, number_of_features=11, training_episode_length=training_episode_length,
@@ -150,13 +151,25 @@ def train_ddpg(HPO, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_s
     # start training
     model.learn(total_timesteps=number_learning_steps)
 
-    # Log Train-info data
-    train_data = {
-        "Mean_eps_env_reward_raw": env.reward_episode_mean,
-        "Mean_eps_reward_sum": env.reward_plus_addon_episode_mean,
-        "Num_steps_per_episode": env.steps_per_episode,
-        "Terminated_in_epsidode": env.terminated,
-    }
+    if env.model_id is not None:
+        # Log Train-info data
+        train_data = {
+            "Mean_eps_env_reward_raw": env.reward_episode_mean,
+            "Mean_eps_reward_sum": env.reward_plus_addon_episode_mean,
+            "Num_steps_per_episode": env.steps_per_episode,
+            "Terminated_in_epsidode": env.terminated,
+            "A_error_mean": env.A_error_mean_per_episode,
+            "B_error_mean": env.B_error_mean_per_episode,
+            "obs_hat_error_mea_per_episode": env.obs_hat_error_mea_per_episode,
+            "Poly_update_per_episode": env.Poly_update_per_episode,
+        }
+    else:
+        train_data = {
+            "Mean_eps_env_reward_raw": env.reward_episode_mean,
+            "Mean_eps_reward_sum": env.reward_plus_addon_episode_mean,
+            "Num_steps_per_episode": env.steps_per_episode,
+            "Terminated_in_epsidode": env.terminated,
+        }
 
     df = pd.DataFrame(train_data)
     makedirs(save_folder + log_path, exist_ok=True)

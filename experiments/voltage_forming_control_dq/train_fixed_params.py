@@ -29,7 +29,7 @@ def ddpg_objective_fix_params_optuna(trial):
     file_congfig = open('experiments/voltage_forming_control_dq/PC2_DDPG_Vctrl_single_inv_22_newTestcase_Trial_number_11534_0.json', )
     trial_config = json.load(file_congfig)
 
-    number_learning_steps = 1000000  # trial.suggest_int("number_learning_steps", 100000, 1000000)
+    number_learning_steps = 300000  # trial.suggest_int("number_learning_steps", 100000, 1000000)
     # rew_weigth = trial.suggest_float("rew_weigth", 0.1, 5)
     # rew_penalty_distribution = trial.suggest_float("antiwindup_weight", 0.1, 5)
     penalty_I_weight = trial_config["penalty_I_weight"]  # trial.suggest_float("penalty_I_weight", 100e-6, 2)
@@ -101,7 +101,7 @@ def ddpg_objective_fix_params_optuna(trial):
     optimizer = trial_config[
         "optimizer"]  # trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"])  # , "LBFGS"])
 
-    number_past_vals = 5#trial_config["number_past_vals"]  # trial.suggest_int("number_past_vals", 0, 15)
+    number_past_vals = 2#trial_config["number_past_vals"]  # trial.suggest_int("number_past_vals", 0, 15)
     number_past_vals = trial.suggest_int("number_past_vals", 0, 7)
 
     number_learning_steps = trial.suggest_int("number_learning_steps", number_learning_steps, number_learning_steps)
@@ -146,6 +146,7 @@ def ddpg_objective_fix_params_optuna(trial):
     tau = trial.suggest_loguniform("tau", tau, tau)  # 2
     train_freq_type = "step"  # trial.suggest_categorical("train_freq_type", ["episode", "step"])
     training_episode_length = trial.suggest_int("training_episode_length", training_episode_length, training_episode_length)  # 128
+    #training_episode_length = trial.suggest_int("training_episode_length", 100, 100)  # 128
     train_freq = trial.suggest_int("train_freq", train_freq, train_freq)
     use_gamma_in_rew = 1
     weight_scale = trial.suggest_loguniform("weight_scale", weight_scale, weight_scale)
@@ -156,8 +157,9 @@ def ddpg_objective_fix_params_optuna(trial):
                                     total_timesteps=number_learning_steps)
 
     safe_layer = trial.suggest_int("safe_layer", 1, 1)
+    learn_model = trial.suggest_int("learn_model", 1, 1)
 
-    loss = train_ddpg(True, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_scale,
+    loss = train_ddpg(False, learning_rate, gamma, use_gamma_in_rew, weight_scale, bias_scale,
                       alpha_relu_actor,
                       batch_size,
                       actor_hidden_size, actor_number_layers, critic_hidden_size, critic_number_layers,
@@ -167,7 +169,7 @@ def ddpg_objective_fix_params_optuna(trial):
                       tau, number_learning_steps, integrator_weight,
                       integrator_weight * antiwindup_weight, penalty_I_weight, penalty_P_weight,
                       train_freq_type, train_freq, t_start_penalty_I, t_start_penalty_P, optimizer,
-                      number_past_vals, seed, n_trail, safe_layer)
+                      number_past_vals, seed, n_trail, safe_layer, learn_model)
 
     """
 
@@ -214,7 +216,7 @@ if __name__ == '__main__':
     #seed = [0, 1, 2]
     #number_past_vals = [0, 1, 2, 3, 4, 5, 6, 7]
     seed = [0]
-    number_past_vals = [2, 5]
+    number_past_vals = [2]
     search_space = {'seed': seed, 'number_past_vals': number_past_vals}  # , 'number_learning_steps': number_learning_steps}
 
 

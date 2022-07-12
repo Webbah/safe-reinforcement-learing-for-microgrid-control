@@ -256,6 +256,7 @@ def calc_feasible_set(
                 plot_polytope_2d(F, wx)
                 plt.show()
                 F3 = F_new.project([1, 2, 3])
+                vertices = pypoman.compute_polytope_vertices(F_new.A, F_new.b)
                 plot_polytope_3d(F3)
 
 
@@ -281,13 +282,13 @@ def calc_feasible_set(
     #plot_polytope_2d(F, wx)
     #plt.show()
     #print(f"2D volume: {F.volume}")
-    #vertices = pypoman.compute_polytope_vertices(F_new.A, F_new.b)
+    vertices = pypoman.compute_polytope_vertices(F_new.A, F_new.b)
     #time.sleep(1)
     F3 = F_new.project([1, 2, 3])
     #plot_polytope_3d(F3)
     #plt.show()
     #print(f"3D volume: {F3.volume}")
-    print(f'not converged after a horizon of {N_max}')
+    #print(f'not converged after a horizon of {N_max}')
 
 
     return F_new

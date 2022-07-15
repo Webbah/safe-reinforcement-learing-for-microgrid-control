@@ -1,6 +1,6 @@
 cfg = dict(lea_vpn_nodes=['lea-skynet', 'lea-picard', 'lea-barclay',
                           'lea-cyberdyne', 'webbah-ThinkPad-L380', 'LEA_WORK35', 'webbah-ThinkPad-T14-Gen-2a'],
-           STUDY_NAME='P10_Safe_DDPG_RLS_DELAY_Poly_U_X_scaling_on_obsError_normalized_soft_constraints_shift',
+           STUDY_NAME='P10_Safe_DDPG_RLS_DELAY_Poly_U_X_scaling_on_obsError_normalized_soft_constraints_shift_loadstep',
            #STUDY_NAME='Debug',
            meas_data_folder='experiment_data/',
            #meas_data_folder='/mnt/hdd1/experimental_results/webbah/experiment_data/',

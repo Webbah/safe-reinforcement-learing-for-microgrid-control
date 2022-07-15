@@ -258,6 +258,8 @@ def calc_feasible_set(
                 F3 = F_new.project([1, 2, 3])
                 vertices = pypoman.compute_polytope_vertices(F_new.A, F_new.b)
                 plot_polytope_3d(F3)
+                asd = 1
+                print(f"3D volume: {F3.volume}")
 
 
             elif verbose == 2:
@@ -287,7 +289,7 @@ def calc_feasible_set(
     F3 = F_new.project([1, 2, 3])
     #plot_polytope_3d(F3)
     #plt.show()
-    #print(f"3D volume: {F3.volume}")
+    print(f"3D volume: {F3.volume}")
     #print(f'not converged after a horizon of {N_max}')
 
 

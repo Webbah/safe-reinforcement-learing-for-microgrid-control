@@ -110,7 +110,7 @@ vertices = pypoman.compute_polytope_vertices(feasible_set.A, feasible_set.b)
 #action_safe, sg_active = safeguard.guide(0, (0, 0))
 
 sad = 1
-
+"""
 R_load2 = 50
 A_sys2 = np.array([[-R1 / L - R2 / (L * (1 + R2 / R_load2)), -1 / L + R2 / (L * (R_load2 + R2))],
                   [1 / (C * (1 + R2 / R_load2)), -1 / (C * (R_load2 + R2))]])
@@ -134,3 +134,4 @@ feasible_set2 = calc_feasible_set(
     progress_bar=False,
     plt_all=False
 )
+"""

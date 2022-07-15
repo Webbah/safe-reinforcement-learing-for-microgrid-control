@@ -3,6 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import scipy
 
 from openmodelica_microgrid_gym.util import dq0_to_abc
 from feasible_set_test import feasible_set, A_d, B_d
@@ -88,15 +89,33 @@ study_name = 'P10_Safe_DDPG_RLS_DELAY_Poly_U_X_scaling_on_obsError_normalized_so
 RLS = 1
 
 
-#trial = ['0']
-#episode_list = [ '0']
-#terminated_list = ['0']
-#study_name = 'P10_Safe_DDPG_RLS_NO_DELAY_Poly_U_X_scaling_on_obsError_normalized_soft_constraints_shift_test' #cfg['STUDY_NAME']
-#RLS = 1
+trial = ['2']
+episode_list = [ '0', '40']
+terminated_list = ['1', '0']
+study_name = 'P10_Safe_DDPG_RLS_DELAY_Poly_U_X_scaling_on_obsError_normalized_soft_constraints_shift' #cfg['STUDY_NAME']
+RLS = 0
+plt_R = 1
 
+
+trial = ['1']
+episode_list = [  '130']
+terminated_list = ['0']
+study_name = 'P10_Safe_DDPG_RLS_DELAY_Poly_U_X_scaling_on_obsError_normalized_soft_constraints_shift_loadstep' #cfg['STUDY_NAME']
+RLS = 1
+plt_R = 1
+
+L = 70e-6
+R1 = 1.1e-3
+R2 = 7e-3
+
+C = 250e-6
 
 interval_list_x = [0, 1]
 ts = 1e-4
+
+v_dead = 650  # net -> v_lim
+i_dead = 400  # net -> i_lim
+V_dc = 400
 
 for i in range(len(trial)):
 
@@ -145,6 +164,14 @@ for i in range(len(trial)):
     plt.title(str(trial))
     plt.show()
 
+    #fig, axs = plt.subplots(3, 1, figsize=(9, 7))
+    plt.title(str(trial))
+    plt.plot(train_data['Num_steps_per_episode'])
+    plt.ylabel('num_Steps')
+    plt.grid()
+    plt.xlabel('Episodes')
+    plt.show()
+
     cumsum_steps = train_data['Num_steps_per_episode'].cumsum()
     fig, axs = plt.subplots(3, 1, figsize=(9, 7))
     plt.title(str(trial))
@@ -189,7 +216,10 @@ for i in range(len(trial)):
                 '_training_episode_number_'+ episode
                 + '_terminated'+ terminated +'.pkl.bz2')
 
-            fig, axs = plt.subplots(4, 1, figsize=(9, 7))
+            if plt_R:
+                fig, axs = plt.subplots(5, 1, figsize=(9, 7))
+            else:
+                fig, axs = plt.subplots(4, 1, figsize=(9, 7))
 
             t = np.arange(0, round((len(episode_data['i_a_training'].to_list())) * ts, 4), ts).tolist()
 
@@ -232,9 +262,28 @@ for i in range(len(trial)):
             axs[3].text(0.25, 0.95, "$\mathrm{r}_\mathrm{min}(-0.75) \cdot (1-\gamma) = -0.04$", transform=axs[3].transAxes, fontsize=14,
                     verticalalignment='top', bbox=props)
 
+            if plt_R:
+                axs[4].plot(t, episode_data['R_load_training'].to_list(), 'g')
+                axs[4].grid()
+                axs[4].set_ylabel('$R_{\mathrm{Load}}\,/\,\mathrm{Ohm}$')
+
             plt.show()
 
             if RLS:
+                R_load = episode_data['R_load_training'].to_numpy()
+                A_sys = np.array([[-R1 / L - R2 / (L * (1 + R2 / R_load)), -1 / L + R2 / (L * (R_load + R2))],
+                                  [1 / (C * (1 + R2 / R_load)), -1 / (C * (R_load + R2))]])
+
+                #B_sys = np.array([[1 / L], [0]])
+
+                A_sys[0,1, :] = A_sys[0, 1, :] * v_dead / i_dead
+                A_sys[1, 0, :] = A_sys[1, 0, :] * i_dead / v_dead
+                #B_sys[0, 0] = B_sys[0, 0] * i_dead / V_dc
+
+                A_d2 = np.ndarray(shape=(2,2,len(R_load)))
+
+                for i in range(len(R_load)):
+                    A_d2[:,:,i] = scipy.linalg.expm(A_sys[:,:,i] * ts)
                 """
                 fig, axs = plt.subplots(2, 1, figsize=(9, 7))
                 axs[0].plot(t, episode_data['A_error'].to_list())
@@ -266,19 +315,23 @@ for i in range(len(trial)):
 
                 fig, axs = plt.subplots(2, 2, figsize=(9, 7))
                 axs[0, 0].plot(t[1:], episode_data['A11_a'].to_list()[1:], 'b')
-                axs[0, 0].plot(t[1:], ones_vec*A_d[0, 0], ':', color='red')
+                #axs[0, 0].plot(t[1:], ones_vec*A_d[0, 0], ':', color='red')
+                axs[0, 0].plot(t[1:], A_d2[0, 0, 1:], ':', color='red')
                 axs[0, 0].grid()
                 axs[0, 0].set_ylabel('Ad11_a')
                 axs[0, 1].plot(t[1:], episode_data['A12_a'].to_list()[1:], 'b')
-                axs[0, 1].plot(t[1:], ones_vec*A_d[0, 1], ':', color='red')
+                #axs[0, 1].plot(t[1:], ones_vec*A_d[0, 1], ':', color='red')
+                axs[0, 1].plot(t[1:], A_d2[0, 1, 1:], ':', color='red')
                 axs[0, 1].grid()
                 axs[0, 1].set_ylabel('Ad12_a')
                 axs[1, 0].plot(t[1:], episode_data['A21_a'].to_list()[1:], 'b')
-                axs[1, 0].plot(t[1:], ones_vec*A_d[1, 0], ':', color='red')
+                #axs[1, 0].plot(t[1:], ones_vec*A_d[1, 0], ':', color='red')
+                axs[1, 0].plot(t[1:], A_d2[1, 0, 1:], ':', color='red')
                 axs[1, 0].grid()
                 axs[1, 0].set_ylabel('Ad21_a')
                 axs[1, 1].plot(t[1:], episode_data['A22_a'].to_list()[1:], 'b')
-                axs[1, 1].plot(t[1:], ones_vec*A_d[1, 1], ':', color='red')
+                #axs[1, 1].plot(t[1:], ones_vec*A_d[1, 1], ':', color='red')
+                axs[1, 1].plot(t[1:], A_d2[1, 1, 1:], ':', color='red')
                 axs[1, 1].grid()
                 axs[1, 1].set_ylabel('Ad22_a')
                 plt.show()

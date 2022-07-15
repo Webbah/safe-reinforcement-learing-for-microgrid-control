@@ -10,7 +10,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.type_aliases import GymStepReturn
 
 from experiments.voltage_forming_control_dq.util.config import cfg
-from feasible_set_test import feasible_set, A_d, B_d, W_x, omega_x, W_u, omega_u, feasible_set2, A_d2, B_d2
+from feasible_set_test import feasible_set, A_d, B_d, W_x, omega_x, W_u, omega_u
 from util.feasible_helper import calc_feasible_set
 from util.rls_model import RLSFit
 from util.safeguard import Safeguard
@@ -187,7 +187,7 @@ class BaseWrapper(Monitor):
             self.u_RL.append(action_abc.tolist())
 
             #
-            a_safe = np.zeros([3])
+
             obs, reward, done, info = super().step(a_safe)
         else:
             obs, reward, done, info = super().step(action_abc)
